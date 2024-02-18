@@ -58,12 +58,12 @@ QQQ-holdings.csv
 A list of the ETF's holdings is saved in the local directory as `QQQ-holdings.csv`.
 Entries are sorted in descending order by portfolio weight.
 
-| Symbol | Description | Portfolio Weight | Shares Held | Market Value |
-| --- | --- | --- | --- | --- |
-| AAPL | Apple Inc | 11.34% | 142.8M | $21.9B |
-| MSFT | Microsoft Corp | 10.15% | 64.5M | $19.6B |
-| AMZN | Amazon.com Inc | 7.66% | 4.3M | $14.8B |
-| ... | ... | ... | ... | ... |  
+| ETF | Symbol | Description | Portfolio Weight | Shares Held | Market Value |
+| --- | --- | --- | --- | --- | --- |
+| QQQ | AAPL | Apple Inc | 11.34% | 142.8M | $21.9B |
+| QQQ | MSFT | Microsoft Corp | 10.15% | 64.5M | $19.6B |
+| QQQ | AMZN | Amazon.com Inc | 7.66% | 4.3M | $14.8B |
+| ... | ... | ... | ... | ... | ... |  
 
 
 ### Program Usage
@@ -126,12 +126,12 @@ $ python3 holdings_dl.py --symbol QQQ -r
 ```
 Raw `QQQ-holdings.csv` :
 
-|Symbol|Description         |Portfolio Weight|Shares Held |Market Value  |
-|------|--------------------|----------------|------------|--------------|
-|AAPL  |Apple Inc           |0.1134          |1428000000.0|219000000000.0|
-|MSFT  |Microsoft Corp      |0.1015          |645000000.0 |196000000000.0|
-|AMZN  |Amazon.com Inc      |0.0766          |43000000.0  |148000000000.0|
-|...|...|...|...|...|
+|ETF|Symbol|Description         |Portfolio Weight|Shares Held |Market Value  |
+|---|------|--------------------|----------------|------------|--------------|
+|QQQ|AAPL  |Apple Inc           |0.1134          |1428000000.0|219000000000.0|
+|QQQ|MSFT  |Microsoft Corp      |0.1015          |645000000.0 |196000000000.0|
+|QQQ|AMZN  |Amazon.com Inc      |0.0766          |43000000.0  |148000000000.0|
+|...|...|...|...|...|...|
 
 ### Generate Log
 
@@ -223,6 +223,15 @@ All data comes  from [Schwab](https://www.schwab.com/research/etfs/tools/compare
 Piper Batey (pbatey@umich.edu)
 
 ## Version History
+
+## Changes
+
+* 0.4
+  * 2/18/2024
+  * Added ETF symbol as first column in the output file, allows for easier lookups when analyzing multiple ETF's
+  * Updated for current Selenium lib compatibility
+  * Search for Anchor tag to 'click' on 60 items per page fixed.  Might not have been an actual problem, but leaving it in as this version is working.
+  * Fixed some FUTURE lib warnings by using StringIO in read_html() calls
 
 * 0.3
   * Supports raw data output
