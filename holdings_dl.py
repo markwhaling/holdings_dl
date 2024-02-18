@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from io import StringIO
 
 '''
     File name: holdings_dl.py
@@ -110,7 +111,9 @@ class HoldingsDownloader:
               "/index.asp?type=holdings&symbol={}".format(etf_symbol)
         try:
             driver.get(url)
-            show_sixty_items = driver.find_element_by_xpath("//a[@perpage='60']")
+            # debugging print("searching for perpage element.")
+            show_sixty_items = driver.find_element(By.XPATH, "//a[@perpage=\"60\"]")
+            # debugging print("found perpage element.")
             show_sixty_items.click()
         except ec.NoSuchElementException:
             if not self.quiet_mode:
@@ -133,7 +136,7 @@ class HoldingsDownloader:
         if not self.quiet_mode:
             print("{}: page 1 of {} ...".format(etf_symbol, num_pages), end=" ")
         time.sleep(.5)  # force wait needed for reliability
-        dataframe_list = [pd.read_html(driver.page_source)[1]]
+        dataframe_list = [pd.read_html(StringIO(str(driver.page_source)))[1]]
         if not self.quiet_mode:
             print("complete")
         current_page = 2
@@ -141,11 +144,11 @@ class HoldingsDownloader:
             if not self.quiet_mode:
                 print("{}: page {} of {} ...".format(etf_symbol, current_page, num_pages), end=" ")
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            next_button = driver.find_element_by_xpath("//li[@pagenumber='{}']".format(current_page))
+            next_button = driver.find_element(By.XPATH, "//li[@pagenumber='{}']".format(current_page))
             driver.execute_script("arguments[0].click();", next_button)
             while True:  # wait until the new data has loaded (read_html() is from pandas so can't use selenium wait)
                 time.sleep(.25)
-                df = pd.read_html(driver.page_source, match="Symbol")[0]
+                df = pd.read_html(StringIO(str(driver.page_source)), match="Symbol")[0]
                 if not df.equals(dataframe_list[-1]):
                     break
             dataframe_list.append(df)
@@ -155,7 +158,8 @@ class HoldingsDownloader:
         # end while
         concat_result = pd.concat(dataframe_list)  # merge into a single dataframe
         result_df = concat_result.drop_duplicates()
-        result_df.columns = ['Symbol', 'Description', 'Portfolio Weight', 'Shares Held', 'Market Value']
+        result_df.insert(0, 'ETF', etf_symbol)
+        result_df.columns = ['ETF', 'Symbol', 'Description', 'Portfolio Weight', 'Shares Held', 'Market Value']
         if self.raw_mode:  # strip symbols and units
             result_df['Portfolio Weight'] = result_df['Portfolio Weight'].apply(self._convert_units_to_float)
             result_df['Shares Held'] = result_df['Shares Held'].apply(self._convert_units_to_float)
@@ -163,7 +167,7 @@ class HoldingsDownloader:
         result_df.to_csv("{}-holdings.csv".format(etf_symbol), index=False)  # create the csv
         if self.log_mode:
             driver.execute_script("window.scrollTo(0, -document.body.scrollHeight);")   # info is at top of page
-            header_elt = driver.find_element_by_xpath("//div[@modulename='FirstGlance']")
+            header_elt = driver.find_element(By.XPATH, "//div[@modulename='FirstGlance']")
             header_text = header_elt.text.split("\n")
             full_name = header_text[0].split(" {}:".format(etf_symbol))[0].encode("ascii", "ignore").decode()
             last_price = header_text[2].split(" ")[0]
